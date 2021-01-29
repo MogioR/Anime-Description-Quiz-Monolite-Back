@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="css/main.css" type="text/css"/>
+	<link rel="stylesheet" href="css/lobby-search.css" type="text/css"/>
+	<title>АйДикЮ</title>
+<head>
+</head>
+<body>
+<div class="container clearfix">
+    <div class="fixed contener">
+		<div id="login-menu" class="">
+			<div class = "center_contener login_conteiner">
+				<div class="middle_text">
+					<span class="login_text text-upper">Авторизация</span>
+				</div>
+				<form>
+				<span class="login_text text-upper">
+				Псевдоним:
+				<div class="element-menu"><input type="text" id="login_box" class = "login_input" size="25"></div>
+				Пароль:
+				<div class="element-menu"><input type="password" id="pass_box" class = "login_input" size="40"></div>
+				<div class="element-menu"><input type="button"  id="login_button" class = "login_button" value="Войти"></div>
+
+				</span>
+				</form>
+			</div>
+		</div>
+		<div id="lobby-sercher-menu" class="hide">
+			<div class="profile middle_text">
+					<span class="login_text text-upper">Профиль</span>
+			</div>
+			<div class ="add-lobby middle_text">
+				<div class="element-menu"><input type="button"  id="create-lobby" class = "login_button" value="Создать лобби"></div>
+			</div>
+		</div>
+		<div id="lobby-menu" class="hide">
+			<div class="profile middle_text">
+					<span class="login_text text-upper">Лобби</span>
+			</div>
+			<div class ="add-lobby middle_text">
+				<div class="element-menu"><input type="button"  id="start-game" class = "login_button" value="Начать игру"></div>
+				<div class="element-menu"><input type="button"  class = "login_button" value="Отключиться"></div>
+			</div>
+		</div>
+		<div id="game-menu" class="hide">
+			<div class="profile middle_text">
+					<span class="login_text text-upper">Игра</span>
+			</div>
+			<div class ="add-lobby middle_text">
+				<div class="element-menu"><input type="button"  class = "login_button" value="Отключиться"></div>
+			</div>
+		</div>
+	</div>
+    <div class="stretch contener gameZone">
+		<div id="loading-text" class="">
+			<div class="center_contener middle_text">
+				<span class="logo_text text-upper">
+					Замечательное<br>
+					AMQ<br>
+					by MogioR
+				</span>
+			</div>
+		</div>
+		<div id="lobby-list" class="hide">
+			<div class="lobby_element">
+				<div class="container clearfix">
+					<div class="element">
+						<div class = "middle_text w100">
+							<span class="login_text text-upper">Глава лобби</span>
+						</div>
+					</div>
+					<div class="element">
+						<div class = "middle_text">
+							<span class="login_text text-upper">Игроки</span>
+						</div>
+					</div>
+					<div class="element">
+						<div class="stretch-element">
+							<div class="table-cell">
+									<span class="login_text text-upper">Подключиться</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id = "lobby-conteiner">
+
+			</div>
+		</div>
+		<div id="lobby" class="hide">
+			<div class="lobby_element middle_text">
+				<span class="login_text text-upper">Игроки</span>
+			</div>
+			<div id="lobby-player-conteiner">
+
+			</div>
+		</div>
+		<div id="game" class="hide">
+			<div class="discription_conteiner">
+			<span class="login_text text-upper discription" id="discription-box"></span>
+			</div>
+			<form>
+				<div class="element-menu"><input type="button"  id="req1" class = "reqest-but" value=""></div>
+				<div class="element-menu"><input type="button"  id="req2" class = "reqest-but" value=""></div>
+				<div class="element-menu"><input type="button"  id="req3" class = "reqest-but" value=""></div>
+				<div class="element-menu"><input type="button"  id="req4" class = "reqest-but" value=""></div>
+			</form>
+
+			<form class="" id="newAnswerSystem">
+				<input id = "gameSearchInput" type="text" placeholder="Аниме">
+				<select id="answerSearchSelector" name="answerSelect" size="5">
+   				</select>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script src="Scripts/jQuery.js"></script>
+<script src="Scripts/Socket.js"></script>
+<script src="Scripts/Login.js"></script>
+<script src="Scripts/game.js"></script>
+<script src="Scripts/LobbySercher.js"></script>
+</body>
+</html>
