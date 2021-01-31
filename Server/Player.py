@@ -1,10 +1,9 @@
 from models import *
 
-class PlayerData:
+class Player:
     def __init__(self, socket, nickname):
-        self.socket = socket
         self.nickname = nickname
-        p = Player.select().where(Player.p_name == nickname).get()
+        p = PlayerModel.select().where(PlayerModel.p_name == nickname).get()
         self.id = p.id
         self.exp = p.p_exp
         self.points = p.p_points

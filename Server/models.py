@@ -9,7 +9,7 @@ class BaseModel(Model):
         database = pg_db
 
 
-class Player(BaseModel):
+class PlayerModel(BaseModel):
     id = PrimaryKeyField(null=False)
     p_name = CharField(null=False, max_length=32, unique=True)
     p_pass_hash = CharField(null=False, max_length=128)
@@ -23,16 +23,16 @@ class Player(BaseModel):
         db_table = "players"
         order_by = ('id',)
 
-class Friends(BaseModel):
-    id_p = ForeignKeyField(Player, backref='players', to_field='id', on_delete='cascade',
+class FriendsModel(BaseModel):
+    id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
                                on_update='cascade')
-    id_f = ForeignKeyField(Player, backref='players', to_field='id', on_delete='cascade',
+    id_f = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
         db_table = "friends"
         primary_key = CompositeKey('id_p', 'id_f')
 
-class Film(BaseModel):
+class FilmModel(BaseModel):
     id = PrimaryKeyField(null=False)
     f_url = TextField(null=False)
     f_creation_date = DateField(null=False)
@@ -44,7 +44,7 @@ class Film(BaseModel):
         db_table = "films"
         order_by = ('id',)
 
-class Gener(BaseModel):
+class GenerModel(BaseModel):
     id = PrimaryKeyField(null=False)
     g_name = CharField(null=False, max_length=128)
 
@@ -52,55 +52,55 @@ class Gener(BaseModel):
         db_table = "generes"
 
 
-class Tag(BaseModel):
+class TagModel(BaseModel):
     id = PrimaryKeyField(null=False)
     t_name = CharField(null=False, max_length=128)
 
     class Meta:
         db_table = "tags"
 
-class Film_name(BaseModel):
+class FilmNameModel(BaseModel):
     id = PrimaryKeyField(null=False)
-    film_id = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+    film_id = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
     f_name = CharField(null=False, max_length=128)
     class Meta:
         db_table = "film_names"
 
-class Film_tag(BaseModel):
-    id_f = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+class FilmTagModel(BaseModel):
+    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
-    id_t = ForeignKeyField(Tag, backref='tags', to_field='id', on_delete='cascade',
+    id_t = ForeignKeyField(TagModel, backref='tags', to_field='id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
         db_table = "film_tags"
         primary_key = CompositeKey('id_f', 'id_t')
 
-class Film_genere(BaseModel):
-    id_f = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+class FilmGenereModel(BaseModel):
+    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
-    id_g = ForeignKeyField(Gener, backref='generes', to_field='id', on_delete='cascade',
+    id_g = ForeignKeyField(GenerModel, backref='generes', to_field='id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
         db_table = "film_genres"
         primary_key = CompositeKey('id_f', 'id_g')
 
-class Player_film(BaseModel):
-    id_p = ForeignKeyField(Player, backref='players', to_field='id', on_delete='cascade',
+class PlayerFilmModel(BaseModel):
+    id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
                                on_update='cascade')
-    id_f = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
         db_table = "player_films"
         primary_key = CompositeKey('id_p', 'id_f')
 
-class Player_reqest(BaseModel):
+class PlayerReqestModel(BaseModel):
     id = PrimaryKeyField(null=False)
-    req_id_p = ForeignKeyField(Player, backref='players', to_field='id', on_delete='cascade',
+    req_id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
                            on_update='cascade')
-    req_req_f = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+    req_req_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
-    req_true_f = ForeignKeyField(Film, backref='films', to_field='id', on_delete='cascade',
+    req_true_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
                                on_update='cascade')
     req_time = FloatField(null=False)
     class Meta:
@@ -113,7 +113,7 @@ class Game(BaseModel):
         db_table = "games"
 
 class Game_reqest(BaseModel):
-    id_rec = ForeignKeyField(Player_reqest, backref='player_reqests', to_field='id', on_delete='cascade',
+    id_rec = ForeignKeyField(PlayerReqestModel, backref='player_reqests', to_field='id', on_delete='cascade',
                                on_update='cascade')
     id_g = ForeignKeyField(Game, backref='games', to_field='id', on_delete='cascade',
                                on_update='cascade')

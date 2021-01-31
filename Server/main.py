@@ -8,7 +8,7 @@ import requests
 import json
 from Lobby import Lobby
 from models import *
-from Player import PlayerData
+from Player import Player
 from bs4 import BeautifulSoup
 import urllib3
 
@@ -34,7 +34,7 @@ class Qestion:
             self.answers[3] = getFilm()
         self.true = random.randint(0,3)
 
-        f_url = Film.select().where(Film.id == int(self.answers[self.true])).get().f_url
+        f_url = FilmModel.select().where(FilmModel.id == int(self.answers[self.true])).get().f_url
         r = requests.get(f_url)
         soup = BeautifulSoup(r.text, 'html.parser')
         self.discription = str(soup.find("p", {"itemprop": "description"}))
@@ -48,10 +48,10 @@ class Qestion:
         self.discription = re.sub("^\s+|\n|\r|\s+$", ' ', self.discription)
 
     def getQestion(self):
-        f0 = Film_name.select().where(Film_name.film_id == int(self.answers[0])).get().f_name
-        f1 = Film_name.select().where(Film_name.film_id == int(self.answers[1])).get().f_name
-        f2 = Film_name.select().where(Film_name.film_id == int(self.answers[2])).get().f_name
-        f3 = Film_name.select().where(Film_name.film_id == int(self.answers[3])).get().f_name
+        f0 = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answers[0])).get().f_name
+        f1 = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answers[1])).get().f_name
+        f2 = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answers[2])).get().f_name
+        f3 = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answers[3])).get().f_name
 
         print(self.discription)
         return "{\"type\": \"game\", \"action\": \"newAnswer\", \"discription\": \"" + self.discription + \
@@ -61,11 +61,11 @@ class Qestion:
         return "{\"type\": \"game\", \"action\": \"trueAnswer\", \"trueAnswer\": " + str(self.true) + "}"
 
 def getAnimeBySubName(SubName):
-    return Film_name.select().where(Film_name.f_name.contains(SubName))
+    return FilmNameModel.select().where(FilmNameModel.f_name.contains(SubName))
 
 def registrationInDB(login,pas):
     try:
-        p = Player(p_name = login, p_pas_hash = pas, is_relative=True)
+        p = PlayerModel(p_name = login, p_pas_hash = pas, is_relative=True)
         p.save()
     except Exception as error:
         print('A New Exception occured: ', str(error))
@@ -73,7 +73,7 @@ def registrationInDB(login,pas):
 
 def loginByBD(login,pas):
     try:
-        p = Player.select().where(Player.p_name == login and Player.p_pass_hash == pas).get()
+        p = PlayerModel.select().where(PlayerModel.p_name == login and PlayerModel.p_pass_hash == pas).get()
         return 1
     except Exception as error:
         return 0
@@ -110,8 +110,8 @@ async def game(lobby):
         await asyncio.sleep(15)
 
 def getFilm():
-    f = Film.select().order_by(fn.Random()).get()
-    ret = Film_name.select().where(Film_name.film_id == int(f.id)).get()
+    f = FilmModel.select().order_by(fn.Random()).get()
+    ret = FilmNameModel.select().where(FilmNameModel.film_id == int(f.id)).get()
     return f.id
 
 async def login(websocket, message):
@@ -121,7 +121,7 @@ async def login(websocket, message):
         req = "{\"type\": \"login\", \"login\": 1}"
         loginPlayers[websocket] = data["nickname"]
         print(len(loginPlayers))
-        p = PlayerData(websocket, data["nickname"])
+        p = Player(websocket, data["nickname"])
         print(str(p.round_played))
         await getLobbyList(websocket)
     else:
