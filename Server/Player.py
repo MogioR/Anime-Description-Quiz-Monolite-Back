@@ -1,4 +1,4 @@
-from models import *
+from Server.models import *
 
 class Player:
     def __init__(self, socket, nickname):

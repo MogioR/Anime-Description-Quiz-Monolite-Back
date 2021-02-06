@@ -6,9 +6,9 @@ import psycopg2
 import websockets
 import requests
 import json
-from Lobby import Lobby
-from models import *
-from Player import Player
+from Server.Lobby import Lobby
+from Server.models import *
+from Server.Player import Player
 from bs4 import BeautifulSoup
 import urllib3
 
