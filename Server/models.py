@@ -1,7 +1,7 @@
 from peewee import *
 from datetime import datetime
-
-pg_db = PostgresqlDatabase('postgres', user='', password='',
+from Server.passwords import *
+pg_db = PostgresqlDatabase('postgres', user=DATABASE_LOGIN, password=DATABASE_PASS,
                            host='localhost', port=5432)
 
 class BaseModel(Model):

@@ -5,6 +5,8 @@ class Lobby:
         self.occupancy = 1
         self.players = [host_name]
         self.sockets = [host_socket]
+        self.timer = 0
+        self.phase = 0
 
     def connect(self, player, socket):
         self.players.append(player)
@@ -14,3 +16,5 @@ class Lobby:
     def disconnect(self, player):
         self.players = [x for ind, x in enumerate(self.players) if x!=player]
         self.occupancy -= 1
+
+    #def update(self):

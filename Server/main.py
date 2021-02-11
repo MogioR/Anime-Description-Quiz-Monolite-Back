@@ -6,9 +6,9 @@ import psycopg2
 import websockets
 import requests
 import json
-from Lobby import Lobby
-from models import *
-from Player import Player
+from Server.Lobby import Lobby
+from Server.models import *
+from Server.Player import Player
 from bs4 import BeautifulSoup
 import urllib3
 
@@ -119,26 +119,23 @@ async def login(websocket, message):
     print("Join " + data["nickname"] + '!')
     if(loginByBD(data["nickname"], data["password"]) == 1):
         req = "{\"type\": \"login\", \"login\": 1}"
-        loginPlayers[websocket] = data["nickname"]
-        print(len(loginPlayers))
-        p = Player(websocket, data["nickname"])
-        print(str(p.round_played))
+        loginPlayers[websocket] = Player(websocket, data["nickname"])
         await getLobbyList(websocket)
     else:
         req = ""
     await websocket.send(req)
 
 async def createLobby(websocket):
-    print("Player " + loginPlayers.get(websocket) + " create lobby!")
-    lobbyList.append(Lobby(loginPlayers.get(websocket), websocket, 8))
+    print("Player " + loginPlayers.get(websocket).nickname + " create lobby!")
+    lobbyList.append(Lobby(loginPlayers.get(websocket).nickname, websocket, 8))
     req = "{\"type\": \"lobby\", \"action\": \"enter\"}"
     await websocket.send(req)
     await getPlayerList(websocket, lobbyList[-1])
 
 async def connectLobby(websocket, message):
     data = json.loads(message)
-    print("Player " + loginPlayers.get(websocket) + ' connect to lobby ' + str(data["id"])+'!')
-    lobbyList[data["id"]].connect(loginPlayers.get(websocket), websocket)
+    print("Player " + loginPlayers.get(websocket).nickname + ' connect to lobby ' + str(data["id"])+'!')
+    lobbyList[data["id"]].connect(loginPlayers.get(websocket).nickname, websocket)
     req = "{\"type\": \"lobby\", \"action\": \"enter\"}"
     await websocket.send(req)
     await notifyNewPlayerList(lobbyList[data["id"]])
@@ -148,7 +145,7 @@ async def notifyNewPlayerList(lobby):
         await getPlayerList(socket, lobby)
 
 async def getLobbyList(websocket):
-    print("Player " + loginPlayers.get(websocket) + " get lobbyes!")
+    print("Player " + loginPlayers.get(websocket).nickname + " get lobbyes!")
     req = "{\"type\": \"lobbyList\", \"lobbyes\": ["
     i = 0
     for lobby in lobbyList:
@@ -160,7 +157,7 @@ async def getLobbyList(websocket):
     await websocket.send(req)
 
 async def getPlayerList(websocket, lobby):
-    print("Player " + loginPlayers.get(websocket) + " get lobby players!")
+    print("Player " + loginPlayers.get(websocket).nickname + " get lobby players!")
     req = "{\"type\": \"lobby\", \"action\": \"getPlayerList\", \"players\": ["
     i = 0
     for player in lobby.players:
@@ -178,21 +175,22 @@ async def lobbyAction(websocket, message):
     elif (data["action"] == "connect"):
         await connectLobby(websocket, message)
     elif (data["action"] == "start"):
-        await asyncio.gather(asyncio.create_task(game(lobbyList[0])))
+        #await asyncio.gather(asyncio.create_task(game(lobbyList[0])))
+        await websocket.send("")
     else:
         await websocket.send("")
 
 async def sendHits(websocket, data):
-    print("Player " + loginPlayers.get(websocket) + " try hint!" + str(len(data["data"])))
+    print("Player " + loginPlayers.get(websocket).nickname + " try hint!" + str(len(data["data"])))
     if(len(data["data"]) >= minHintMaskSize):
-        print("Player " + loginPlayers.get(websocket) + " get hint!")
+        print("Player " + loginPlayers.get(websocket).nickname + " get hint!")
         req = "{\"type\": \"game\", \"action\": \"newHints\", \"hints\": ["
         hints = getAnimeBySubName(data["data"])
         i = 0
-        for lobby in lobbyList:
-            req += " \"" + str(hints[i].f_name) + "\""
+        for h in hints:
+            req += "\"" + str(hints[i].f_name) + "\""
             i += 1
-            if (i < len(lobbyList)):
+            if (i < len(hints)):
                 req += ','
         req += "]}"
         await websocket.send(req)
@@ -218,33 +216,47 @@ async def chackMessage(websocket, message):
     else:
         await websocket.send("")
 
+async def lobbyUpdate():
+    print(1)
+    await asyncio.sleep(1)
+
 async def time(websocket, path):
     while True:
         async for message in websocket:
             await chackMessage(websocket, message)
 
 
-# http = urllib3.PoolManager()
-#
-# url = 'https://shikimori.one/animes/21-one-piece'
-# response = http.request('GET', url)
-# soup = BeautifulSoup(response.data, 'html.parser')
-#
-# #print(soup)
-# disc = str(soup.find("div", {"class": "b-text_with_paragraphs"}))
-# disc = re.sub("(?:<).*?(?:>)", ' ', disc)
-# print(disc)
+async def consumer(websocket, message):
+    await chackMessage(websocket, message)
 
-# Film_name.select().where(Film_name.film_id == int(f.id)).get()
+async def consumer_handler(websocket, path):
+    async for message in websocket:
+        await consumer(websocket, message)
 
+async def game_loop():
+    await asyncio.sleep(1)
+    return ""
 
-# while(1):
-#     line = input()
-#     print(line)
-#     quere = getAnimeBySubName(line)
-#     for q in quere:
-#         print(str(q.id) + " " + str(q.film_id) + " " + q.f_name)
+async def producer_handler(websocket, path):
+    while True:
+        message = await game_loop()
+        if len(message) != 0:
+            await websocket.send(message)
 
-start_server = websockets.serve(time, "127.0.0.1", 5678)
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+async def handler(websocket, path):
+    consumer_task = asyncio.ensure_future(
+        consumer_handler(websocket, path))
+    producer_task = asyncio.ensure_future(
+        producer_handler(websocket, path))
+    done, pending = await asyncio.wait(
+        [consumer_task, producer_task],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+    for task in pending:
+        task.cancel()
+
+start_server = websockets.serve(handler, "127.0.0.1", 5678)
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_server)
+loop.run_forever()
