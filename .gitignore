@@ -9,8 +9,13 @@ passwords.py
 *.pem
 *.pth
 *.rst
-*.py
 
 !/Server/
 !/Client/
 
+*.pyc
+
+Server/__pycache__/Lobby.cpython-38.pyc
+Server/__pycache__/models.cpython-38.pyc
+Server/__pycache__/passwords.cpython-38.pyc
+Server/__pycache__/Player.cpython-38.pyc
