@@ -1,17 +1,23 @@
 import asyncio
 import websockets
 import json
+import time
+
+from collections import deque
 
 from Server.PlayerManager import PlayerManager
 from Server.LobbyManager import LobbyManager
 from Server.GameManager import GameManager
+from Server.Package import Package
 from Server.models import *
-from Server.Player import Player
-from Server.Question import Qestion
+
 
 lobbyManager = LobbyManager()
 playerManager = PlayerManager()
 gameManager = GameManager()
+
+messageQueues = deque()
+gameLoopAlive = 0
 
 def registrationInDB(login,pas):
     try:
@@ -21,17 +27,15 @@ def registrationInDB(login,pas):
         print('A New Exception occured: ', str(error))
 
 async def login(websocket, data):
-    await playerManager.login(websocket, data["nickname"], data["password"], lobbyManager)
+    await playerManager.login(websocket, data["nickname"], data["password"], lobbyManager, messageQueues)
 
-async def lobbyAction(websocket, data):
+def lobbyAction(websocket, data):
     if(data["action"] == "create"):
-        await lobbyManager.create(websocket, playerManager)
+        lobbyManager.create(websocket, playerManager, messageQueues)
     elif (data["action"] == "connect"):
-        await lobbyManager.connectLobby(websocket, data["id"], playerManager)
+        lobbyManager.connectLobby(websocket, data["id"], playerManager, messageQueues)
     elif (data["action"] == "start"):
-        await lobbyManager.lobbyList[data["id"]].start()
-    else:
-        await websocket.send("")
+        lobbyManager.gameStart(0, messageQueues)
 
 async def gameAction(websocket, data):
     if(data["action"] == "reqestHints"):
@@ -39,11 +43,12 @@ async def gameAction(websocket, data):
     else:
         await websocket.send("")
 
-async def chackMessage(websocket, data):
+async def chackMessage(websocket, message):
+    data = json.loads(message)
     if(data["type"] == "login"):
         await login(websocket, data)
     elif(data["type"] == "lobby"):
-        await lobbyAction(websocket, data)
+        lobbyAction(websocket, data)
     elif (data["type"] == "game"):
         await gameAction(websocket, data)
     else:
@@ -53,28 +58,33 @@ async def lobbyUpdate():
     print(1)
     await asyncio.sleep(1)
 
-async def time(websocket, path):
-    while True:
-        async for message in websocket:
-            await chackMessage(websocket, message)
-
 async def consumer(websocket, message):
     await chackMessage(websocket, message)
 
 async def consumer_handler(websocket, path):
     async for message in websocket:
+        print("Consume")
         await consumer(websocket, message)
 
 async def game_loop():
-    await lobbyManager.update()
-    await asyncio.sleep(1)
-    return ""
+    global gameLoopAlive
+    if(gameLoopAlive == 0):
+        gameLoopAlive = 1
+        await lobbyManager.update()
+        await asyncio.sleep(1)
+        gameLoopAlive = 0
+        print(time.time())
+    else:
+        await asyncio.sleep(1)
 
 async def producer_handler(websocket, path):
+    global gameLoopAlive
     while True:
-        message = await game_loop()
-        if len(message) != 0:
-            await websocket.send(message)
+        await game_loop()
+
+        while(len(messageQueues) != 0):
+            package = messageQueues.popleft()
+            await package.socket.send(package.message)
 
 async def handler(websocket, path):
     consumer_task = asyncio.ensure_future(

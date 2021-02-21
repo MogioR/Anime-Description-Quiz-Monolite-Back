@@ -1,22 +1,22 @@
 from Server.Question import Qestion
 from Server.Lobby import Lobby
+from Server.Package import Package
 
 class LobbyManager:
     def __init__(self):
         self.lobbyList = []
 
-    async def create(self, websocket, playerManager):
-        self.lobbyList.append(Lobby(playerManager.loginPlayers.get(websocket).nickname, websocket, 8))
+    def create(self, websocket, playerManager, messageQueues):
+        self.lobbyList.append(Lobby(playerManager.onlinePlayers.get(websocket).nickname, websocket, 8))
         req = "{\"type\": \"lobby\", \"action\": \"enter\"}"
-        await websocket.send(req)
-        await self.getPlayerList(websocket, self.lobbyList[-1], playerManager)
+        messageQueues.append(Package(websocket, req))
+        self.getPlayerList(websocket, self.lobbyList[-1], messageQueues)
 
     async def update(self):
         for lobby in self.lobbyList:
             await lobby.update()
 
-    async def getPlayerList(self, websocket, lobby, playerManager):
-        print("Player " + playerManager.loginPlayers.get(websocket).nickname + " get lobby players!")
+    def getPlayerList(self, websocket, lobby, messageQueues):
         req = "{\"type\": \"lobby\", \"action\": \"getPlayerList\", \"players\": ["
         i = 0
         for player in lobby.players:
@@ -25,20 +25,30 @@ class LobbyManager:
             if (i < len(lobby.players)):
                 req += ','
         req += "]}"
-        await websocket.send(req)
+        messageQueues.append(Package(websocket, req))
 
-    async def connectLobby(self, websocket, id, playerManager):
-        self.lobbyList[id].connect(playerManager.loginPlayers.get(websocket).nickname, websocket)
+    def connectLobby(self, websocket, id, playerManager, messageQueues):
+        self.lobbyList[id].connect(playerManager.onlinePlayers.get(websocket).nickname, websocket)
         req = "{\"type\": \"lobby\", \"action\": \"enter\"}"
-        await websocket.send(req)
-        await self.notifyNewPlayerList(self.lobbyList[id])
+        messageQueues.append(Package(websocket, req))
+        self.notifyNewPlayerList(self.lobbyList[id], messageQueues)
 
-    async def notifyNewPlayerList(self, lobby):
+    def notifyNewPlayerList(self, lobby, messageQueues):
         for socket in lobby.sockets:
-            await self.getPlayerList(socket, lobby)
+            self.getPlayerList(socket, lobby, messageQueues)
 
-    async def getLobbyList(self, websocket, playerManager):
-        print("Player " + playerManager.loginPlayers.get(websocket).nickname + " get lobbyes!")
+    def notifyPlayers(self, lobby, message, messageQueues):
+        for socket in lobby.sockets:
+            messageQueues.append(Package(socket, message))
+
+    def notifyGameStart(self, lobby, messageQueues):
+        self.notifyPlayers(lobby, "{\"type\": \"lobby\", \"action\": \"startGame\"}", messageQueues)
+
+    def gameStart(self, lobbyId, messageQueues):
+        self.lobbyList[lobbyId].start()
+        self.notifyGameStart(self.lobbyList[lobbyId], messageQueues)
+
+    def getLobbyList(self, websocket, messageQueues):
         req = "{\"type\": \"lobbyList\", \"lobbyes\": ["
         i = 0
         for lobby in self.lobbyList:
@@ -48,4 +58,4 @@ class LobbyManager:
             if (i < len(self.lobbyList)):
                 req += ','
         req += "]}"
-        await websocket.send(req)
+        messageQueues.append(Package(websocket, req))

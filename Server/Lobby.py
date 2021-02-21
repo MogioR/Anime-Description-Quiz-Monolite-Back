@@ -44,14 +44,14 @@ class Lobby:
                 self.timer = 0
             elif (self.phase == 1):
                 self.timer = 0
-                q = Qestion()
+                self.question = Qestion()
                 self.phase = self.phase + 1
             elif(self.phase == 2):
-                self.timer = 10
+                self.timer = 5
                 self.phase = self.phase + 1
                 await self.sendQuestion()
             elif(self.phase == 3):
-                self.timer = 10
+                self.timer = 5
                 self.phase = self.phase + 1
                 await self.sendAnswer()
             else:

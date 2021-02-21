@@ -5,7 +5,7 @@ gameSearchInput.addEventListener("input", () => {
 
 function newAnswer(event)
 {
-
+    $("#discription-box").text(event.discription);
 }
 
 function trueAnswer(event)
