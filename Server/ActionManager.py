@@ -23,6 +23,7 @@ class ActionManager:
     def lobbyAction(self, websocket, data, messageQueue):
         if data["action"] == "create":
             self.lobbyManager.create(websocket, self.playerManager, messageQueue)
+
         elif data["action"] == "connect":
             self.lobbyManager.connectToLobby(websocket, data["id"], self.playerManager, messageQueue)
         elif data["action"] == "start":

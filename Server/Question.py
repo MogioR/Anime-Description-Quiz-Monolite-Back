@@ -6,14 +6,17 @@ import json
 
 class Qestion:
     def __init__(self):
+        self.answer = -1
+        self.discription = ""
+
+    async def getNewQestion(self):
         self.answer = self.getFilm()
-        print(self.answer)
         f_url = FilmModel.select().where(FilmModel.id == int(self.answer)).get().f_url
         self.answer = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answer)).get().f_name
         r = requests.get(f_url)
         soup = BeautifulSoup(r.text, 'html.parser')
 
-        #TODO: Make this more smart
+        # TODO: Make this more smart
         self.discription = str(soup.find("p", {"itemprop": "description"}))
         self.discription = self.discription.replace("<p itemprop=\"description\">", "")
         self.discription = self.discription.replace("[Written by MAL Rewrite]</p>", "")

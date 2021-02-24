@@ -15,14 +15,15 @@ async def consumer_handler(websocket, path):
     async for message in websocket:
         try:
             await consumer(websocket, message)
-        finally:
+        except:
+            print("disconnect")
             actionManager.playerManager.disconnect(websocket, actionManager.lobbyManager, messageQueue)
 
 async def game_loop():
     global gameLoopAlive
     if(gameLoopAlive == 0):
         gameLoopAlive = 1
-        actionManager.lobbyManager.update(messageQueue)
+        await actionManager.lobbyManager.update(messageQueue)
         await asyncio.sleep(1)
         gameLoopAlive = 0
     else:
@@ -34,6 +35,7 @@ async def producer_handler(websocket, path):
         await game_loop()
         while(len(messageQueue) != 0):
             package = messageQueue.popleft()
+            print(package.message)
             await package.socket.send(package.message)
 
 async def handler(websocket, path):

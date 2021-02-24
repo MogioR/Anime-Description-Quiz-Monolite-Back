@@ -25,7 +25,7 @@ class PlayerManager:
 
     def disconnect(self, socket, lobbyManeger, messageQueue):
         nickname = self.loginPlayers[socket].nickname
-        lobbyManeger.disconect(socket, nickname, messageQueue)
+        lobbyManeger.disconnect(socket, nickname, messageQueue)
         del self.loginPlayers[socket]
 
     def notifyByState(self, state, message, messageQueue):

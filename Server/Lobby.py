@@ -7,8 +7,8 @@ class Lobby:
         self.host = host_name
         self.size = size
         self.occupancy = 1
-        self.players = [host_name]
-        self.sockets = [host_socket]
+        self.players = []
+        self.sockets = []
         self.timer = 0
         self.phase = 0
         self.question = Qestion()
@@ -27,20 +27,20 @@ class Lobby:
         self.phase = 0
         self.timer = 0
 
-    def update(self, messageQueue):
+    async def update(self, messageQueue):
         self.timer = self.timer - 1
-        if(self.timer <= 0):
-            if(self.phase == 0):
+        if self.timer <= 0:
+            if self.phase == 0:
                 self.timer = 0
-            elif (self.phase == 1):
+            elif self.phase == 1:
                 self.timer = 0
-                self.question = Qestion()
+                await self.question.getNewQestion()
                 self.phase = self.phase + 1
-            elif(self.phase == 2):
+            elif self.phase == 2:
                 self.timer = 5
                 self.phase = self.phase + 1
                 notifySockets(self.sockets, self.question.getQestionMessage(), messageQueue)
-            elif(self.phase == 3):
+            elif self.phase == 3:
                 self.timer = 5
                 self.phase = self.phase + 1
                 notifySockets(self.sockets, self.question.getAnswerMessage(), messageQueue)
