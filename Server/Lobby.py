@@ -1,5 +1,6 @@
 import asyncio
 from Server.Question import Qestion
+from Server.serverUtilites import *
 
 class Lobby:
     def __init__(self, host_name,  host_socket, size, id):
@@ -18,14 +19,6 @@ class Lobby:
         self.occupancy += 1
         self.sockets.append(socket)
 
-    async def sendQuestion(self):
-        for socket in self.sockets:
-            await socket.send(self.question.getQestion())
-
-    async def sendAnswer(self):
-        for socket in self.sockets:
-            await socket.send(self.question.getAnswer())
-
     def start(self):
         self.phase = 1
         self.timer = 0
@@ -34,7 +27,7 @@ class Lobby:
         self.phase = 0
         self.timer = 0
 
-    async def update(self):
+    def update(self, messageQueue):
         self.timer = self.timer - 1
         if(self.timer <= 0):
             if(self.phase == 0):
@@ -46,10 +39,10 @@ class Lobby:
             elif(self.phase == 2):
                 self.timer = 5
                 self.phase = self.phase + 1
-                await self.sendQuestion()
+                notifySockets(self.sockets, self.question.getQestionMessage(), messageQueue)
             elif(self.phase == 3):
                 self.timer = 5
                 self.phase = self.phase + 1
-                await self.sendAnswer()
+                notifySockets(self.sockets, self.question.getAnswerMessage(), messageQueue)
             else:
                 self.phase = 1

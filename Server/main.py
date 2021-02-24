@@ -22,7 +22,7 @@ async def game_loop():
     global gameLoopAlive
     if(gameLoopAlive == 0):
         gameLoopAlive = 1
-        await actionManager.lobbyManager.update()
+        actionManager.lobbyManager.update(messageQueue)
         await asyncio.sleep(1)
         gameLoopAlive = 0
     else:

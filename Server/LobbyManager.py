@@ -47,6 +47,6 @@ class LobbyManager:
             i = i + 1
         return -1
 
-    async def update(self):
+    async def update(self, messageQueue):
         for lobby in self.lobbyList:
-            await lobby.update()
+            await lobby.update(messageQueue)
