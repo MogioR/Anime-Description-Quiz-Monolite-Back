@@ -6,57 +6,47 @@ from Server.serverUtilites import *
 class LobbyManager:
     def __init__(self):
         self.lobbyList = []
+        self.counter = 0
 
-    def create(self, websocket, playerManager, messageQueues):
-        self.lobbyList.append(Lobby(playerManager.onlinePlayers.get(websocket).nickname, websocket, 8))
-        req = json.dumps({'type': 'lobby', 'action': 'enter'})
-        messageQueues.append(Package(websocket, req))
-        self.getPlayerList(websocket, self.lobbyList[-1], messageQueues)
-        #notifySockets(playerManager.onlinePlayers.keys(), )
+    def create(self, websocket, playerManager, messageQueue):
+        self.lobbyList.append(Lobby(playerManager.onlinePlayers.get(websocket).nickname, websocket, 8, self.counter))
+        self.connectToLobby(websocket, self.counter, playerManager, messageQueue)
+        self.counter = self.counter+1
 
-    async def update(self):
-        for lobby in self.lobbyList:
-            await lobby.update()
+    def connectToLobby(self, websocket, id, playerManager, messageQueue):
+        index = self.getLobbyIndexById(id)
+        if index != -1 and self.lobbyList[index].size < self.lobbyList[index].occupancy:
+            self.lobbyList[index].connect(playerManager.onlinePlayers.get(websocket).nickname, websocket)
 
-    def getPlayerList(self, websocket, lobby, messageQueues):
-        req = json.dumps({'type': 'lobby', 'action': 'getPlayerList', 'players' : lobby.players})
-        print(req)
-        messageQueues.append(Package(websocket, req))
-
-    def connectLobby(self, websocket, id, playerManager, messageQueues):
-        self.lobbyList[id].connect(playerManager.onlinePlayers.get(websocket).nickname, websocket)
-        req = json.dumps({'type': 'lobby', 'action': 'enter'})
-        messageQueues.append(Package(websocket, req))
-        self.notifyNewPlayerList(self.lobbyList[id], messageQueues)
-
-    def notifyNewPlayerList(self, lobby, messageQueues):
-        for socket in lobby.sockets:
-            self.getPlayerList(socket, lobby, messageQueues)
-
-    def notifyPlayers(self, lobby, message, messageQueues):
-        for socket in lobby.sockets:
-            messageQueues.append(Package(socket, message))
-
-    def notifyGameStart(self, lobby, messageQueues):
-        req = json.dumps({'type': 'lobby', 'action': 'startGame'})
-        self.notifyPlayers(lobby, req, messageQueues)
-
-    def gameStart(self, lobbyId, messageQueues):
-        self.lobbyList[lobbyId].start()
-        self.notifyGameStart(self.lobbyList[lobbyId], messageQueues)
-
-    def getLobbyListReqest(self):
-        req = "{\"type\": \"lobbyList\", \"lobbyes\": ["
-        i = 0
-        for lobby in self.lobbyList:
-            req += "{\"host\": \"" + lobby.host + "\",\"size\": " + str(lobby.size) + ",\"occupancy\":" + str(
-                lobby.occupancy) + ",\"id\":" + str(i) + " } "
-            i += 1
-            if (i < len(self.lobbyList)):
-                req += ','
-        req += "]}"
-        return req
+            playerManager.loginPlayers[websocket].state = "inLobby"
+            messageQueue.append(Package(websocket, json.dumps({'type': 'lobby', 'action': 'enter'})))
+            message = json.dumps({'type': 'lobby', 'action': 'getPlayerList', 'players': self.lobbyList[index].players})
+            notifySockets(self.lobbyList[index].sockets, message, messageQueue)
+            playerManager.notifyByState("lobbySearch", self.getLobbyListMessage(), messageQueue)
 
     def disconnect(self, socket, nickname, messageQueue):
         for lobby in self.lobbyList:
             lobby.disconnect(socket, nickname, messageQueue)
+
+
+    def gameStart(self, lobbyId, messageQueue):
+        self.lobbyList[lobbyId].start()
+        notifySockets(self.lobbyList[lobbyId].sockets, json.dumps({'type': 'lobby', 'action': 'startGame'}), messageQueue)
+
+    def getLobbyListMessage(self):
+        buf_message = []
+        for lobby in self.lobbyList:
+            buf_message.append(json.dumps({'host': lobby.host, 'size': str(lobby.size), 'occupancy': lobby.occupancy, 'id': lobby.id}))
+        return json.dumps({'type': 'lobbySearch', 'action': 'getLobbyList', 'lobbyes': buf_message})
+
+    def getLobbyIndexById(self, id):
+        i = 0
+        for lobby in self.lobbyList:
+            if lobby.id == id:
+                return i
+            i = i + 1
+        return -1
+
+    async def update(self):
+        for lobby in self.lobbyList:
+            await lobby.update()

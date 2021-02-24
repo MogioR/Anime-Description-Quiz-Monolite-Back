@@ -8,7 +8,7 @@ socket.onmessage = function(e) {
     {
         loginEvent(event);
     }
-    else if(event.type == "lobbyList")
+    else if(event.type == "lobbySearch")
     {
         updateLobby(event);
     }

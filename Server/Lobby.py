@@ -2,7 +2,7 @@ import asyncio
 from Server.Question import Qestion
 
 class Lobby:
-    def __init__(self, host_name,  host_socket, size):
+    def __init__(self, host_name,  host_socket, size, id):
         self.host = host_name
         self.size = size
         self.occupancy = 1
@@ -11,12 +11,14 @@ class Lobby:
         self.timer = 0
         self.phase = 0
         self.question = Qestion()
+        self.id = id
 
     def connect(self, player, socket):
         self.players.append(player)
         self.occupancy += 1
         self.sockets.append(socket)
 
+    async def sendQuestion(self):
         for socket in self.sockets:
             await socket.send(self.question.getQestion())
 
@@ -33,7 +35,7 @@ class Lobby:
         self.timer = 0
 
     async def update(self):
-        self.timer = self.timer - 1;
+        self.timer = self.timer - 1
         if(self.timer <= 0):
             if(self.phase == 0):
                 self.timer = 0

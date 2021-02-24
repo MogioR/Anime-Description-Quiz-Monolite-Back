@@ -1,28 +1,34 @@
+import json
+
 from Server.models import *
 from Server.Player import Player
 from Server.Package import Package
 
 class PlayerManager:
     def __init__(self):
-        self.onlinePlayers = {}
+        self.loginPlayers = {}
 
-    async def login(self, websocket, nickname, password, lobbyManager, messageQueues):
-        if (self.loginByBD(nickname, password) == 1):
-            req = "{\"type\": \"login\", \"login\": 1}"
-            self.onlinePlayers[websocket] = Player(websocket, nickname)
-            lobbyManager.getLobbyListReqest(websocket, messageQueues)
-        else:
-            req = ""
-        messageQueues.append(Package(websocket, req))
+    async def login(self, websocket, nickname, password, lobbyManager, messageQueue):
+        player = await self.loginByBD(nickname, password)
+        if player is not None:
+            self.loginPlayers[websocket] = Player(player)
+            req = json.dumps({'type': 'login', 'action': 'login', 'login': 1})
+            messageQueue.append(Package(websocket, req))
+            messageQueue.append(Package(websocket, lobbyManager.getLobbyListMessage()))
 
-    def loginByBD(self, login, password):
+    async def loginByBD(self, login, password):
         try:
-            p = PlayerModel.select().where(PlayerModel.p_name == login and PlayerModel.p_pass_hash == password).get()
-            return 1
+            player = PlayerModel.select().where(PlayerModel.p_name == login and PlayerModel.p_pass_hash == password).get()
+            return player
         except Exception as error:
-            return 0
+            return None
 
     def disconnect(self, socket, lobbyManeger, messageQueue):
-        nickname = self.onlinePlayers[socket].nickname
+        nickname = self.loginPlayers[socket].nickname
         lobbyManeger.disconect(socket, nickname, messageQueue)
-        del self.onlinePlayers[socket]
+        del self.loginPlayers[socket]
+
+    def notifyByState(self, state, message, messageQueue):
+        for socket in self.loginPlayers.keys():
+            if self.loginPlayers[socket].state == state:
+                messageQueue.append(Package(socket, message))
