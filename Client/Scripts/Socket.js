@@ -1,14 +1,14 @@
 var socket = new WebSocket("ws://127.0.0.1:5678/");
 
 socket.onmessage = function(e) {
-    alert(e.data)
+    console.log(e.data)
     let event = JSON.parse(e.data);
 
     if(event.type == "login")
     {
         loginEvent(event);
     }
-    else if(event.type == "lobbyList")
+    else if(event.type == "lobbySearch")
     {
         updateLobby(event);
     }
@@ -28,12 +28,12 @@ socket.onmessage = function(e) {
         else if(event.action == "newAnswer")
             newAnswer(event);
         else if(event.action == "newHints")
-            updateSearchSelector("answerSearchSelector", event.data);
+            updateSearchSelector("answerSearchSelector", event.hints);
     }
 };
 
 socket.onopen = function() {
-  alert("Соединение установлено.");
+  console.log("Соединение установлено.");
 };
 
 /*

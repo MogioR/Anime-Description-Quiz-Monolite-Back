@@ -1,11 +1,17 @@
 !/Server/
 !/Client/
+<<<<<<< HEAD
+=======
+.idea
+=======
+>>>>>>> working
 /*
 passwords.py
 *.txt
 *.pem
 *.pth
 *.rst
+<<<<<<< HEAD
 *.py
 venv/Lib/site-packages/_distutils_hack/__init__.py
 venv/Lib/site-packages/_distutils_hack/override.py
@@ -828,3 +834,19 @@ venv/Scripts/pip3.exe
 venv/Scripts/pwiz.py
 venv/Scripts/python.exe
 venv/Scripts/pythonw.exe
+=======
+
+!/Server/
+!/Client/
+
+*.pyc
+
+Server/__pycache__/Lobby.cpython-38.pyc
+Server/__pycache__/models.cpython-38.pyc
+Server/__pycache__/passwords.cpython-38.pyc
+Server/__pycache__/Player.cpython-38.pyc
+>>>>>>> working
+Server/__pycache__/Lobby.cpython-38.pyc
+Server/__pycache__/models.cpython-38.pyc
+Server/__pycache__/passwords.cpython-38.pyc
+Server/__pycache__/Player.cpython-38.pyc
