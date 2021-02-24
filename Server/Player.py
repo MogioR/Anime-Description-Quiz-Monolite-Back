@@ -11,3 +11,4 @@ class Player:
         self.roundPlayed = p.p_round_played
         self.trueAnswers = p.p_true_answers
         self.registrationDate = p.p_registration
+        self.state = "lobbySearch"

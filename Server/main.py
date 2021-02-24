@@ -1,8 +1,6 @@
 import asyncio
 import websockets
 import json
-import time
-
 from collections import deque
 
 from Server.PlayerManager import PlayerManager
@@ -11,12 +9,11 @@ from Server.GameManager import GameManager
 from Server.Package import Package
 from Server.models import *
 
-
 lobbyManager = LobbyManager()
 playerManager = PlayerManager()
 gameManager = GameManager()
 
-messageQueues = deque()
+messageQueue = deque()
 gameLoopAlive = 0
 
 def registrationInDB(login,pas):
@@ -27,15 +24,15 @@ def registrationInDB(login,pas):
         print('A New Exception occured: ', str(error))
 
 async def login(websocket, data):
-    await playerManager.login(websocket, data["nickname"], data["password"], lobbyManager, messageQueues)
+    await playerManager.login(websocket, data["nickname"], data["password"], lobbyManager, messageQueue)
 
 def lobbyAction(websocket, data):
     if(data["action"] == "create"):
-        lobbyManager.create(websocket, playerManager, messageQueues)
+        lobbyManager.create(websocket, playerManager, messageQueue)
     elif (data["action"] == "connect"):
-        lobbyManager.connectLobby(websocket, data["id"], playerManager, messageQueues)
+        lobbyManager.connectLobby(websocket, data["id"], playerManager, messageQueue)
     elif (data["action"] == "start"):
-        lobbyManager.gameStart(0, messageQueues)
+        lobbyManager.gameStart(0, messageQueue)
 
 async def gameAction(websocket, data):
     if(data["action"] == "reqestHints"):
@@ -54,17 +51,15 @@ async def chackMessage(websocket, message):
     else:
         await websocket.send("")
 
-async def lobbyUpdate():
-    print(1)
-    await asyncio.sleep(1)
-
 async def consumer(websocket, message):
     await chackMessage(websocket, message)
 
 async def consumer_handler(websocket, path):
     async for message in websocket:
-        print("Consume")
-        await consumer(websocket, message)
+        try:
+            await consumer(websocket, message)
+        finally:
+            playerManager.disconnect(websocket, lobbyManager, messageQueue)
 
 async def game_loop():
     global gameLoopAlive
@@ -73,7 +68,6 @@ async def game_loop():
         await lobbyManager.update()
         await asyncio.sleep(1)
         gameLoopAlive = 0
-        print(time.time())
     else:
         await asyncio.sleep(1)
 
@@ -81,9 +75,8 @@ async def producer_handler(websocket, path):
     global gameLoopAlive
     while True:
         await game_loop()
-
-        while(len(messageQueues) != 0):
-            package = messageQueues.popleft()
+        while(len(messageQueue) != 0):
+            package = messageQueue.popleft()
             await package.socket.send(package.message)
 
 async def handler(websocket, path):

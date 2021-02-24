@@ -10,7 +10,7 @@ class PlayerManager:
         if (self.loginByBD(nickname, password) == 1):
             req = "{\"type\": \"login\", \"login\": 1}"
             self.onlinePlayers[websocket] = Player(websocket, nickname)
-            lobbyManager.getLobbyList(websocket, messageQueues)
+            lobbyManager.getLobbyListReqest(websocket, messageQueues)
         else:
             req = ""
         messageQueues.append(Package(websocket, req))
@@ -21,3 +21,8 @@ class PlayerManager:
             return 1
         except Exception as error:
             return 0
+
+    def disconnect(self, socket, lobbyManeger, messageQueue):
+        nickname = self.onlinePlayers[socket].nickname
+        lobbyManeger.disconect(socket, nickname, messageQueue)
+        del self.onlinePlayers[socket]

@@ -17,11 +17,6 @@ class Lobby:
         self.occupancy += 1
         self.sockets.append(socket)
 
-    def disconnect(self, player):
-        self.players = [x for ind, x in enumerate(self.players) if x!=player]
-        self.occupancy -= 1
-
-    async def sendQuestion(self):
         for socket in self.sockets:
             await socket.send(self.question.getQestion())
 
