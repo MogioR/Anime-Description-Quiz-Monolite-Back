@@ -12,6 +12,7 @@ passwords.py
 
 !/Server/
 !/Client/
+!/Parser/
 
 *.pyc
 
