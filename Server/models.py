@@ -35,6 +35,8 @@ class FriendsModel(BaseModel):
 class FilmModel(BaseModel):
     id = PrimaryKeyField(null=False)
     f_url = TextField(null=False)
+    f_shikimori_id = FixedCharField(null=False, max_length=20)
+    f_type = SmallIntegerField(null=False)
     f_creation_date = DateField(null=False)
     f_true_answers = IntegerField(null=False, default=0)
     f_round_played = IntegerField(null=False, default=0)

@@ -4,6 +4,10 @@ from collections import deque
 
 from Server.ActionManager import ActionManager
 
+from bs4 import BeautifulSoup
+import requests
+import re
+
 actionManager = ActionManager()
 messageQueue = deque()
 gameLoopAlive = 0
@@ -49,6 +53,11 @@ async def handler(websocket, path):
     )
     for task in pending:
         task.cancel()
+
+def filldb(url):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    
 
 start_server = websockets.serve(handler, "127.0.0.1", 5678)
 
