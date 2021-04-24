@@ -1,13 +1,16 @@
 import asyncio
-from Server.Question import Qestion
+from Question import Qestion
+from serverUtilites import *
+
+PHASE_TIMER = 30
 
 class Lobby:
     def __init__(self, host_name,  host_socket, size, id):
         self.host = host_name
         self.size = size
         self.occupancy = 1
-        self.players = [host_name]
-        self.sockets = [host_socket]
+        self.players = []
+        self.sockets = []
         self.timer = 0
         self.phase = 0
         self.question = Qestion()
@@ -18,14 +21,6 @@ class Lobby:
         self.occupancy += 1
         self.sockets.append(socket)
 
-    async def sendQuestion(self):
-        for socket in self.sockets:
-            await socket.send(self.question.getQestion())
-
-    async def sendAnswer(self):
-        for socket in self.sockets:
-            await socket.send(self.question.getAnswer())
-
     def start(self):
         self.phase = 1
         self.timer = 0
@@ -34,22 +29,22 @@ class Lobby:
         self.phase = 0
         self.timer = 0
 
-    async def update(self):
+    async def update(self, messageQueue):
         self.timer = self.timer - 1
-        if(self.timer <= 0):
-            if(self.phase == 0):
+        if self.timer <= 0:
+            if self.phase == 0:
                 self.timer = 0
-            elif (self.phase == 1):
+            elif self.phase == 1:
                 self.timer = 0
-                self.question = Qestion()
+                await self.question.getNewQestion()
                 self.phase = self.phase + 1
-            elif(self.phase == 2):
-                self.timer = 5
+            elif self.phase == 2:
+                self.timer = PHASE_TIMER
                 self.phase = self.phase + 1
-                await self.sendQuestion()
-            elif(self.phase == 3):
-                self.timer = 5
+                notifySockets(self.sockets, self.question.getQestionMessage(), messageQueue)
+            elif self.phase == 3:
+                self.timer = PHASE_TIMER
                 self.phase = self.phase + 1
-                await self.sendAnswer()
+                notifySockets(self.sockets, self.question.getAnswerMessage(), messageQueue)
             else:
                 self.phase = 1

@@ -1,33 +1,24 @@
-from Server.models import *
+from models import *
 from bs4 import BeautifulSoup
 import requests
 import re
+import json
 
 class Qestion:
     def __init__(self):
+        self.answer = -1
+        self.discription = ""
+
+    async def getNewQestion(self):
         self.answer = self.getFilm()
         print(self.answer)
-        f_url = FilmModel.select().where(FilmModel.id == int(self.answer)).get().f_url
-        self.answer = FilmNameModel.select().where(FilmNameModel.film_id == int(self.answer)).get().f_name
-        r = requests.get(f_url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        self.discription = str(soup.find("p", {"itemprop": "description"}))
-        self.discription = self.discription.replace("<p itemprop=\"description\">", "")
-        self.discription = self.discription.replace("[Written by MAL Rewrite]</p>", "")
-        self.discription = self.discription.replace("<i/>", " ")
-        self.discription = self.discription.replace("<i>", " ")
-        self.discription = self.discription.replace("</i>", " ")
-        self.discription = self.discription.replace("<br/>", " ")
-        self.discription = self.discription.replace("\"", " \\\"")
-        self.discription = re.sub("^\s+|\n|\r|\s+$", ' ', self.discription)
+        self.discription = TitlesDescriptionsModel.select().where(TitlesDescriptionsModel.titles_descriptions_title_id == int(self.answer)).get().titles_descriptions_descriptions_text
+    def getQestionMessage(self):
+        return json.dumps({'type': "game", 'action':"newAnswer", 'discription': self.discription})
 
-    def getQestion(self):
-        return "{\"type\": \"game\", \"action\": \"newAnswer\", \"discription\": \"" + self.discription + "\"}"
-
-    def getAnswer(self):
-        return "{\"type\": \"game\", \"action\": \"trueAnswer\", \"trueAnswer\": \"" + str(self.answer) + "\"}"
+    def getAnswerMessage(self):
+        return json.dumps({'type': "game", 'action': "trueAnswer", 'trueAnswer': TitlesNamesModel.select().where(TitlesNamesModel.titles_names_title_id == self.answer).get().titles_names_name})
 
     def getFilm(self):
-        f = FilmModel.select().order_by(fn.Random()).get()
-        #ret = FilmNameModel.select().where(FilmNameModel.film_id == int(f.id)).get()
-        return f.id
+        f = TitlesModel.select().where(TitlesModel.titles_has_description == True).order_by(fn.Random()).get()
+        return f.titles_id

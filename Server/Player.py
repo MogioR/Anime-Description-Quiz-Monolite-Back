@@ -1,20 +1,17 @@
-from Server.models import *
-<<<<<<< HEAD
-=======
+from models import *
 
 START_PLAYER_STATE = "lobbySearch"
->>>>>>> working
 
 class Player:
     def __init__(self, player):
         self.state = START_PLAYER_STATE
         self.currentAnswer = ""
 
-        self.nickname = player.p_name
-        self.id = player.id
-        self.exp = player.p_exp
-        self.points = player.p_points
-        self.roundPlayed = player.p_round_played
-        self.trueAnswers = player.p_true_answers
-        self.registrationDate = player.p_registration
+        self.nickname = player.players_login
+        self.id = player.players_id
+        self.exp = player.players_exp
+        self.points = player.players_speshal_points
+        self.roundPlayed = player.players_rounds_played
+        self.trueAnswers = player.players_true_answers
+        self.registrationDate = player.players_registration
 

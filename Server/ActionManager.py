@@ -1,8 +1,8 @@
 import json
 
-from Server.PlayerManager import PlayerManager
-from Server.LobbyManager import LobbyManager
-from Server.GameManager import GameManager
+from PlayerManager import PlayerManager
+from LobbyManager import LobbyManager
+from GameManager import GameManager
 
 class ActionManager:
     def __init__(self):
@@ -23,6 +23,7 @@ class ActionManager:
     def lobbyAction(self, websocket, data, messageQueue):
         if data["action"] == "create":
             self.lobbyManager.create(websocket, self.playerManager, messageQueue)
+
         elif data["action"] == "connect":
             self.lobbyManager.connectToLobby(websocket, data["id"], self.playerManager, messageQueue)
         elif data["action"] == "start":

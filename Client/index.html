@@ -3,6 +3,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<link rel="stylesheet" href="css/main.css" type="text/css"/>
 	<link rel="stylesheet" href="css/lobby-search.css" type="text/css"/>
+	<link rel="stylesheet" href="css/game.css" type="text/css"/>
 	<title>АйДикЮ</title>
 <head>
 </head>
@@ -21,7 +22,6 @@
 				Пароль:
 				<div class="element-menu"><input type="password" id="pass_box" class = "login_input" size="40"></div>
 				<div class="element-menu"><input type="button"  id="login_button" class = "login_button" value="Войти"></div>
-
 				</span>
 				</form>
 			</div>
@@ -70,7 +70,7 @@
 							<span class="login_text text-upper">Глава лобби</span>
 						</div>
 					</div>
-					<div class="element">
+					<div class="elementz">
 						<div class = "middle_text">
 							<span class="login_text text-upper">Игроки</span>
 						</div>
@@ -97,14 +97,19 @@
 			</div>
 		</div>
 		<div id="game" class="hide">
-			<div class="discription_conteiner">
-			<span class="login_text text-upper discription" id="discription-box"></span>
+			<div class="titleContent-conteiner">
+				<div class="titleContent">
+					<span class="titleDescription" id="discription-box">
+					</span>
+				</div>
 			</div>
-			<form class="" id="newAnswerSystem">
-				<input id = "gameSearchInput" type="text" placeholder="Аниме">
-				<select id="answerSearchSelector" name="answerSelect" size="5">
+			<div class="gameInput-conteiner">
+			<form class="gameInput" id="newAnswerSystem">
+				<input id = "gameSearchInput" class="titleSearch" type="text" placeholder="Аниме">
+				<select id="answerSearchSelector" class= "titleSelect" name="answerSelect" size="5">
    				</select>
 			</form>
+			</div>
 		</div>
 	</div>
 </div>

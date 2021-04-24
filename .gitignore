@@ -838,6 +838,7 @@ venv/Scripts/pythonw.exe
 
 !/Server/
 !/Client/
+!/Parser/
 
 *.pyc
 
