@@ -1,7 +1,7 @@
 import json
-from Server.Lobby import Lobby
-from Server.Package import Package
-from Server.serverUtilites import *
+from Lobby import Lobby
+from Package import Package
+from serverUtilites import *
 
 class LobbyManager:
     def __init__(self):

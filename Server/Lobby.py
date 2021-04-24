@@ -1,6 +1,8 @@
 import asyncio
-from Server.Question import Qestion
-from Server.serverUtilites import *
+from Question import Qestion
+from serverUtilites import *
+
+PHASE_TIMER = 30
 
 class Lobby:
     def __init__(self, host_name,  host_socket, size, id):
@@ -37,11 +39,11 @@ class Lobby:
                 await self.question.getNewQestion()
                 self.phase = self.phase + 1
             elif self.phase == 2:
-                self.timer = 5
+                self.timer = PHASE_TIMER
                 self.phase = self.phase + 1
                 notifySockets(self.sockets, self.question.getQestionMessage(), messageQueue)
             elif self.phase == 3:
-                self.timer = 5
+                self.timer = PHASE_TIMER
                 self.phase = self.phase + 1
                 notifySockets(self.sockets, self.question.getAnswerMessage(), messageQueue)
             else:

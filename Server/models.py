@@ -1,124 +1,153 @@
 from peewee import *
 from datetime import datetime
-from Server.passwords import *
-pg_db = PostgresqlDatabase('postgres', user=DATABASE_LOGIN, password=DATABASE_PASS,
+from passwords import *
+pg_db = PostgresqlDatabase('adq', user=DATABASE_LOGIN, password=DATABASE_PASS,
                            host='localhost', port=5432)
 
 class BaseModel(Model):
     class Meta:
         database = pg_db
 
+class PlayersModel(BaseModel):
+    players_id = IdentityField()
+    players_login = CharField(null=False, max_length=32, unique=True)
+    players_pass_hash = CharField(null=False, max_length=128)
+    players_exp = IntegerField(null=False, default=0)
+    players_speshal_points = IntegerField(null=False, default=0)
 
-class PlayerModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    p_name = CharField(null=False, max_length=32, unique=True)
-    p_pass_hash = CharField(null=False, max_length=128)
-    p_exp = IntegerField(null=False, default=0)
-    p_points = IntegerField(null=False, default=0)
-    p_true_answers = IntegerField(null=False, default=0)
-    p_round_played = IntegerField(null=False, default=0)
-    p_registration = DateField(null=False, default=datetime.now())
+    players_true_answers = IntegerField(null=False, default=0)
+    players_rounds_played = IntegerField(null=False, default=0)
+
+    players_registration = DateField(null=False, default=datetime.now())
+    players_last_login = DateField(null=False, default=datetime.now())
+    players_is_baned = BooleanField(null=False, default=False)
+
+    players_shikimori_login = CharField(null=True, max_length=128)
+    players_mal_login = CharField(null=True, max_length=128)
+    players_anilist_login = CharField(null=True, max_length=128)
 
     class Meta:
         db_table = "players"
-        order_by = ('id',)
+        order_by = ('players_id',)
 
-class FriendsModel(BaseModel):
-    id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
+class FriendsListModel(BaseModel):
+    friends_list_id_player = ForeignKeyField(PlayersModel, backref='players', to_field='players_id', on_delete='cascade',
                                on_update='cascade')
-    id_f = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
+    friends_list_id_friend = ForeignKeyField(PlayersModel, backref='players', to_field='players_id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
-        db_table = "friends"
-        primary_key = CompositeKey('id_p', 'id_f')
+        db_table = "friends_list"
+        primary_key = CompositeKey('friends_list_id_player', 'friends_list_id_friend')
 
-class FilmModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    f_url = TextField(null=False)
-    f_shikimori_id = FixedCharField(null=False, max_length=20)
-    f_type = SmallIntegerField(null=False)
-    f_creation_date = DateField(null=False)
-    f_true_answers = IntegerField(null=False, default=0)
-    f_round_played = IntegerField(null=False, default=0)
-    f_rating = FloatField(null=False, default=5)
+class TitlesModel(BaseModel):
+    titles_id = IdentityField()
+    titles_type = SmallIntegerField(null=False) #0-anime, 1-manga, 2-ranobe
+    titles_subtype = FixedCharField(null=False, max_length=32)
+    titles_shikimori_id = FixedCharField(null=False, max_length=20)
 
-    class Meta:
-        db_table = "films"
-        order_by = ('id',)
+    titles_creation_date = DateField(null=False, default=datetime.now())
+    titles_rating = FloatField(null=False, default=0)
 
-class GenerModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    g_name = CharField(null=False, max_length=128)
+    titles_has_description = BooleanField(null=False, default=False)
+    titles_has_pictures = BooleanField(null=False, default=False)
+    titles_has_music = BooleanField(null=False, default=False)
 
     class Meta:
-        db_table = "generes"
+        db_table = "titles"
+        order_by = ('titles_id',)
 
+class GenresModel(BaseModel):
+    genres_id = IdentityField()
+    genres_family_id = SmallIntegerField(null=False)
+    genres_name = CharField(null=False, max_length=32)
+    genres_language = SmallIntegerField(null=False, default=0) #0-ru, 1-eng
 
-class TagModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    t_name = CharField(null=False, max_length=128)
+    class Meta:
+        db_table = "genres"
+
+class TagsModel(BaseModel):
+    tags_id = IdentityField()
+    tags_family_id = SmallIntegerField(null=False)
+    tags_name = CharField(null=False, max_length=32)
+    tags_language = SmallIntegerField(null=False, default=0) #0-ru, 1-eng
 
     class Meta:
         db_table = "tags"
 
-class FilmNameModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    film_id = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
+class TitlesNamesModel(BaseModel):
+    titles_names_id = IdentityField()
+    titles_names_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
                                on_update='cascade')
-    f_name = CharField(null=False, max_length=128)
-    class Meta:
-        db_table = "film_names"
+    titles_names_name = CharField(null=False, max_length=128)
+    titles_names_language = SmallIntegerField(null=False, default=0)  # 0-ru, 1-eng
 
-class FilmTagModel(BaseModel):
-    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
-                               on_update='cascade')
-    id_t = ForeignKeyField(TagModel, backref='tags', to_field='id', on_delete='cascade',
-                               on_update='cascade')
     class Meta:
-        db_table = "film_tags"
-        primary_key = CompositeKey('id_f', 'id_t')
+        db_table = "titles_names"
 
-class FilmGenereModel(BaseModel):
-    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
+class TitlesTagsModel(BaseModel):
+    titles_tags_tag_id = ForeignKeyField(TagsModel, backref='tags', to_field='tags_id', on_delete='cascade',
                                on_update='cascade')
-    id_g = ForeignKeyField(GenerModel, backref='generes', to_field='id', on_delete='cascade',
+    titles_tags_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
                                on_update='cascade')
-    class Meta:
-        db_table = "film_genres"
-        primary_key = CompositeKey('id_f', 'id_g')
 
-class PlayerFilmModel(BaseModel):
-    id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
-                               on_update='cascade')
-    id_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
-                               on_update='cascade')
     class Meta:
-        db_table = "player_films"
-        primary_key = CompositeKey('id_p', 'id_f')
+        db_table = "titles_tags"
+        primary_key = CompositeKey('titles_tags_tag_id', 'titles_tags_title_id')
 
-class PlayerReqestModel(BaseModel):
-    id = PrimaryKeyField(null=False)
-    req_id_p = ForeignKeyField(PlayerModel, backref='players', to_field='id', on_delete='cascade',
-                           on_update='cascade')
-    req_req_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
+class TitlesGenresModel(BaseModel):
+    titles_genres_genre_id = ForeignKeyField(GenresModel, backref='genres', to_field='genres_id', on_delete='cascade',
                                on_update='cascade')
-    req_true_f = ForeignKeyField(FilmModel, backref='films', to_field='id', on_delete='cascade',
+    titles_genres_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
                                on_update='cascade')
-    req_time = FloatField(null=False)
-    class Meta:
-        db_table = "player_reqests"
 
-class Game(BaseModel):
-    id = PrimaryKeyField(null=False)
-    g_type = IntegerField(null=False, default=0)
     class Meta:
-        db_table = "games"
+        db_table = "titles_genres"
+        primary_key = CompositeKey('titles_genres_genre_id', 'titles_genres_title_id')
 
-class Game_reqest(BaseModel):
-    id_rec = ForeignKeyField(PlayerReqestModel, backref='player_reqests', to_field='id', on_delete='cascade',
+class TitlesListModel(BaseModel):
+    titles_list_id_player = ForeignKeyField(PlayersModel, backref='players', to_field='players_id', on_delete='cascade',
                                on_update='cascade')
-    id_g = ForeignKeyField(Game, backref='games', to_field='id', on_delete='cascade',
+    titles_list_id_title = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
                                on_update='cascade')
     class Meta:
-        db_table = "games_reqests"
-        primary_key = CompositeKey('id_rec', 'id_g')
+        db_table = "titles_list"
+        primary_key = CompositeKey('titles_list_id_player', 'titles_list_id_title')
+
+class TitlesDescriptionsModel(BaseModel):
+    titles_descriptions_id = IdentityField()
+    titles_descriptions_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
+                               on_update='cascade')
+    titles_descriptions_language = SmallIntegerField(null=False, default=0)  # 0-ru, 1-eng
+    titles_descriptions_descriptions_text = TextField(null=False)
+
+    titles_descriptions_true_answers = IntegerField(null=False, default=0)
+    titles_descriptions_round_played = IntegerField(null=False, default=0)
+
+    class Meta:
+        db_table = "titles_descriptions"
+
+class TitlesPicturesModel(BaseModel):
+    titles_pictures_id = IdentityField()
+    titles_pictures_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
+                               on_update='cascade')
+    titles_pictures_pictures_url = TextField(null=False)
+
+    titles_pictures_true_answers = IntegerField(null=False, default=0)
+    titles_pictures_round_played = IntegerField(null=False, default=0)
+
+    class Meta:
+        db_table = "titles_pictures"
+
+
+class TitlesMusicsModel(BaseModel):
+    titles_musics_id = IdentityField()
+    titles_musics_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
+                                               on_update='cascade')
+    titles_musics_musics_url = TextField(null=False)
+
+    titles_musics_true_answers = IntegerField(null=False, default=0)
+    titles_musics_round_played = IntegerField(null=False, default=0)
+
+    class Meta:
+        db_table = "titles_musics"
+
