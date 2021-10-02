@@ -65,15 +65,6 @@ class GenresModel(BaseModel):
     class Meta:
         db_table = "genres"
 
-class TagsModel(BaseModel):
-    tags_id = IdentityField()
-    tags_family_id = SmallIntegerField(null=False)
-    tags_name = CharField(null=False, max_length=32)
-    tags_language = SmallIntegerField(null=False, default=0) #0-ru, 1-eng
-
-    class Meta:
-        db_table = "tags"
-
 class TitlesNamesModel(BaseModel):
     titles_names_id = IdentityField()
     titles_names_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
@@ -84,25 +75,14 @@ class TitlesNamesModel(BaseModel):
     class Meta:
         db_table = "titles_names"
 
-class TitlesTagsModel(BaseModel):
-    titles_tags_tag_id = ForeignKeyField(TagsModel, backref='tags', to_field='tags_id', on_delete='cascade',
-                               on_update='cascade')
-    titles_tags_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
-                               on_update='cascade')
-
-    class Meta:
-        db_table = "titles_tags"
-        primary_key = CompositeKey('titles_tags_tag_id', 'titles_tags_title_id')
-
 class TitlesGenresModel(BaseModel):
-    titles_genres_genre_id = ForeignKeyField(GenresModel, backref='genres', to_field='genres_id', on_delete='cascade',
-                               on_update='cascade')
+    titles_genres_id = IdentityField()
+    titles_genres_genre_family_id = SmallIntegerField(null=False)
     titles_genres_title_id = ForeignKeyField(TitlesModel, backref='titles', to_field='titles_id', on_delete='cascade',
                                on_update='cascade')
 
     class Meta:
         db_table = "titles_genres"
-        primary_key = CompositeKey('titles_genres_genre_id', 'titles_genres_title_id')
 
 class TitlesListModel(BaseModel):
     titles_list_id_player = ForeignKeyField(PlayersModel, backref='players', to_field='players_id', on_delete='cascade',

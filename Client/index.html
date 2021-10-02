@@ -4,6 +4,7 @@
 	<link rel="stylesheet" href="css/main.css" type="text/css"/>
 	<link rel="stylesheet" href="css/lobby-search.css" type="text/css"/>
 	<link rel="stylesheet" href="css/game.css" type="text/css"/>
+	<link rel="stylesheet" href="css/check-select.css" type="text/css"/>
 	<title>АйДикЮ</title>
 <head>
 </head>
@@ -53,7 +54,7 @@
 		</div>
 	</div>
     <div class="stretch contener gameZone">
-		<div id="loading-text" class="german-block">
+		<div id="loading-text" class="hide german-block">
 			<div class="center_contener middle_text">
 				<span class="logo_text text-upper">
 					Замечательное<br>
@@ -111,6 +112,28 @@
 			</form>
 			</div>
 		</div>
+		<div id="lobby-options" class="">
+			<input type="checkbox" id="list-on-checkbox">
+			<label for="list-on-checkbox">Использовать лист</label>
+
+			<div class="checkselect">
+				<label><input type="checkbox" name="brands[]" value="1"> Google Inc.</label>
+				<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+				<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+				<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+				<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+				<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+			</div>
+
+			<div class="checkselect">
+				<label><input type="checkbox" name="brands[]" value="1"> Google Inc.</label>
+				<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+				<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+				<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+				<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+				<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -119,5 +142,6 @@
 <script src="Scripts/Login.js"></script>
 <script src="Scripts/game.js"></script>
 <script src="Scripts/LobbySercher.js"></script>
+<script src="Scripts/CheckSelect.js"></script>
 </body>
 </html>

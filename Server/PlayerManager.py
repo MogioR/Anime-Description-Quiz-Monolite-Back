@@ -19,7 +19,7 @@ class PlayerManager:
 
     async def loginByBD(self, login, password):
         try:
-            player = PlayersModel.select().where(PlayersModel.players_login == login and PlayersModel.players_pass_hash == password).get()
+            player = PlayersModel.select().where((PlayersModel.players_login == login) & (PlayersModel.players_pass_hash == password)).get()
             return player
         except Exception as error:
             return None
