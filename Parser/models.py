@@ -1,8 +1,8 @@
 from peewee import *
 from datetime import datetime
 from passwords import *
-pg_db = PostgresqlDatabase('postgres', user=DATABASE_LOGIN, password=DATABASE_PASS,
-                           host='localhost', port=5432)
+pg_db = PostgresqlDatabase('db', user=DATABASE_LOGIN, password=DATABASE_PASS,
+                           host='192.168.1.103', port=5432)
 
 class BaseModel(Model):
     class Meta:

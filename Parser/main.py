@@ -5,13 +5,16 @@ import json
 import io
 import time
 import re
+import ssl
 
 def getShikimoriParams(url):
     mas = url.split("/")
     id_str = mas[-1].split("-")[0]
     return mas[-2], id_str
 
+
 def getAnimeData(_names, type, id):
+
     url_anime = "https://shikimori.one/"
     req_current = Request(url=url_anime + type + '/' + str(id), headers=headers)
     html_current = urlopen(req_current).read()

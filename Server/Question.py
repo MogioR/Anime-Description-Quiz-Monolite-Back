@@ -4,6 +4,7 @@ import requests
 import re
 import json
 
+
 class Qestion:
     def __init__(self):
         self.answer = -1
@@ -13,11 +14,13 @@ class Qestion:
         self.answer = self.getFilm()
         print(self.answer)
         self.discription = TitlesDescriptionsModel.select().where(TitlesDescriptionsModel.titles_descriptions_title_id == int(self.answer)).get().titles_descriptions_descriptions_text
+
     def getQestionMessage(self):
-        return json.dumps({'type': "game", 'action':"newAnswer", 'discription': self.discription})
+        return json.dumps({'action': "game", 'type': "newQuestion", 'questionType': 'text',
+                           'text': self.discription})
 
     def getAnswerMessage(self):
-        return json.dumps({'type': "game", 'action': "trueAnswer", 'trueAnswer': TitlesNamesModel.select().where(TitlesNamesModel.titles_names_title_id == self.answer).get().titles_names_name})
+        return json.dumps({'action': "game", 'type': "trueAnswer", 'trueAnswer': TitlesNamesModel.select().where(TitlesNamesModel.titles_names_title_id == self.answer).get().titles_names_name})
 
     def getFilm(self):
         f = TitlesModel.select().where(TitlesModel.titles_has_description == True).order_by(fn.Random()).get()

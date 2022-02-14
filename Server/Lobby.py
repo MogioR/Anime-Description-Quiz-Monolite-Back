@@ -5,10 +5,10 @@ from serverUtilites import *
 PHASE_TIMER = 30
 
 class Lobby:
-    def __init__(self, host_name,  host_socket, size, id):
+    def __init__(self, host_name, host_socket, size, id):
         self.host = host_name
         self.size = size
-        self.occupancy = 1
+        self.occupancy = 0
         self.players = []
         self.sockets = []
         self.timer = 0

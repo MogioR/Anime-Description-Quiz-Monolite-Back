@@ -19,28 +19,28 @@ class LobbyManager:
         if index != -1 and self.lobbyList[index].size > self.lobbyList[index].occupancy:
             self.lobbyList[index].connect(playerManager.loginPlayers.get(websocket).nickname, websocket)
             playerManager.loginPlayers[websocket].state = "inLobby"
-            messageQueue.append(Package(websocket, json.dumps({'type': 'lobby', 'action': 'enter'})))
-            message = json.dumps({'type': 'lobby', 'action': 'getPlayerList', 'players': self.lobbyList[index].players})
+            messageQueue.append(Package(websocket, json.dumps({'action': 'lobby', 'type': 'enter'})))
+            message = json.dumps({'action': 'lobby', 'type': 'setPlayerList', 'players': self.lobbyList[index].players})
             notifySockets(self.lobbyList[index].sockets, message, messageQueue)
-            playerManager.notifyByState("lobbySearch", self.getLobbyListMessage(), messageQueue)
+            playerManager.notifyByState("lobbyList", self.getLobbyListMessage(), messageQueue)
 
     def disconnect(self, socket, nickname, messageQueue):
         for lobby in self.lobbyList:
             lobby.disconnect(socket, nickname, messageQueue)
 
-
     def gameStart(self, lobbyId, messageQueue):
         self.lobbyList[lobbyId].start()
-        notifySockets(self.lobbyList[lobbyId].sockets, json.dumps({'type': 'lobby', 'action': 'startGame'}), messageQueue)
+        notifySockets(self.lobbyList[lobbyId].sockets, json.dumps({'action': 'lobby', 'type': 'startGame'}), messageQueue)
 
     def getLobbyListMessage(self):
         buf_message = []
         for lobby in self.lobbyList:
             buf_message.append(json.dumps({'host': lobby.host, 'size': str(lobby.size), 'occupancy': lobby.occupancy, 'id': lobby.id}))
-        message = json.dumps({'type': 'lobbySearch', 'action': 'getLobbyList', 'lobbyes': buf_message})
+        message = json.dumps({'action': 'lobbyList', 'type': 'setLobbyList', 'lobbies': buf_message})
         message = message.replace("\\", "")
         message = message.replace("[\"", "[")
         message = message.replace("\"]", "]")
+        message = message.replace('}", "{', "},{")
         return message
 
     def getLobbyIndexById(self, id):

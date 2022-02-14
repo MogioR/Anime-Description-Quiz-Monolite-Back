@@ -13,7 +13,7 @@ class GameManager:
             print(hints)
             for hint in hints:
                 message_buf.append(hint.titles_names_name)
-            messageQueue.append(Package(websocket, json.dumps({'type': "game", 'action': "newHints", 'hints': message_buf})))
+            messageQueue.append(Package(websocket, json.dumps({'action': "game", 'type': "newHints", 'hints': message_buf})))
 
     def getAnimeBySubName(self, subname):
         return TitlesNamesModel.select().where(TitlesNamesModel.titles_names_name.contains(subname))

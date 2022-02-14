@@ -1,6 +1,6 @@
 import asyncio
 import websockets
-from models  import *
+from models import *
 from collections import deque
 import json
 
@@ -14,21 +14,24 @@ actionManager = ActionManager()
 messageQueue = deque()
 gameLoopAlive = 0
 
+
 async def consumer(websocket, message):
-    print(message)
     await actionManager.chackMessage(websocket, message, messageQueue)
+
 
 async def consumer_handler(websocket, path):
     async for message in websocket:
+        print(websocket, message)
         try:
             await consumer(websocket, message)
         except:
             print("disconnect")
             actionManager.playerManager.disconnect(websocket, actionManager.lobbyManager, messageQueue)
 
+
 async def game_loop():
     global gameLoopAlive
-    if(gameLoopAlive == 0):
+    if gameLoopAlive == 0:
         gameLoopAlive = 1
         await actionManager.lobbyManager.update(messageQueue)
         await asyncio.sleep(1)
@@ -36,14 +39,19 @@ async def game_loop():
     else:
         await asyncio.sleep(1)
 
+
 async def producer_handler(websocket, path):
     global gameLoopAlive
     while True:
         await game_loop()
-        while(len(messageQueue) != 0):
+        while len(messageQueue) != 0:
             package = messageQueue.popleft()
-            print(package.message)
-            await package.socket.send(package.message)
+            print(websocket, package.message)
+            try:
+                await package.socket.send(package.message)
+            except Exception as e:
+                print("disconnect")
+
 
 async def handler(websocket, path):
     consumer_task = asyncio.ensure_future(
@@ -56,6 +64,7 @@ async def handler(websocket, path):
     )
     for task in pending:
         task.cancel()
+
 
 def filldb(url):
     r = requests.get(url)

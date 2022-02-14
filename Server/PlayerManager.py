@@ -4,6 +4,7 @@ from models import *
 from Player import Player
 from Package import Package
 
+
 class PlayerManager:
     def __init__(self):
         self.loginPlayers = {}
@@ -13,9 +14,12 @@ class PlayerManager:
         print(player)
         if player is not None:
             self.loginPlayers[websocket] = Player(player)
-            req = json.dumps({'type': 'login', 'action': 'login', 'login': 1})
+            req = json.dumps({'action': 'login', 'type': 'login', 'login': True})
             messageQueue.append(Package(websocket, req))
             messageQueue.append(Package(websocket, lobbyManager.getLobbyListMessage()))
+        else:
+            req = json.dumps({'action': 'login', 'type': 'login', 'login': False})
+            messageQueue.append(Package(websocket, req))
 
     async def loginByBD(self, login, password):
         try:
