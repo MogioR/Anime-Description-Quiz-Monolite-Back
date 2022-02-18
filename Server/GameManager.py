@@ -7,13 +7,13 @@ MIN_MASK_SIZE = 4
 
 class GameManager:
     def sendHits(self, websocket, data, messageQueue):
-        if (len(data["data"]) >= MIN_MASK_SIZE):
+        if len(data["data"]) >= MIN_MASK_SIZE:
             hints = self.getAnimeBySubName(data["data"])
             message_buf = []
-            print(hints)
             for hint in hints:
                 message_buf.append(hint.titles_names_name)
-            messageQueue.append(Package(websocket, json.dumps({'action': "game", 'type': "newHints", 'hints': message_buf})))
+            messageQueue.append(Package(websocket, json.dumps({'action': "game", 'type': "newHints",
+                                                               'hints': message_buf}, ensure_ascii=False)))
 
     def getAnimeBySubName(self, subname):
-        return TitlesNamesModel.select().where(TitlesNamesModel.titles_names_name.contains(subname))
+        return TitlesNamesModel.select().where(TitlesNamesModel.titles_names_name.contains(subname)).distinct()

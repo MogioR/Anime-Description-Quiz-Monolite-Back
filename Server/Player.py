@@ -1,10 +1,10 @@
 from models import *
 
-START_PLAYER_STATE = "lobbySearch"
+START_PLAYER_STATE = "lobby_list"
+
 
 class Player:
     def __init__(self, player):
-        self.state = START_PLAYER_STATE
         self.currentAnswer = ""
 
         self.nickname = player.players_login
@@ -14,4 +14,5 @@ class Player:
         self.roundPlayed = player.players_rounds_played
         self.trueAnswers = player.players_true_answers
         self.registrationDate = player.players_registration
+        self.state = {'screen': START_PLAYER_STATE, 'screen_id': -1}
 

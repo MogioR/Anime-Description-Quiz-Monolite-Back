@@ -3,6 +3,7 @@ import websockets
 from models import *
 from collections import deque
 import json
+import threading
 
 from ActionManager import ActionManager
 
@@ -16,7 +17,7 @@ gameLoopAlive = 0
 
 
 async def consumer(websocket, message):
-    await actionManager.chackMessage(websocket, message, messageQueue)
+    await actionManager.checkMessage(websocket, message, messageQueue)
 
 
 async def consumer_handler(websocket, path):
@@ -24,9 +25,13 @@ async def consumer_handler(websocket, path):
         print(websocket, message)
         try:
             await consumer(websocket, message)
-        except:
-            print("disconnect")
-            actionManager.playerManager.disconnect(websocket, actionManager.lobbyManager, messageQueue)
+        except Exception as e:
+            print("disconnect", e)
+            actionManager.disconnect(websocket, messageQueue)
+
+        if websocket.closed:
+            print("DISCONNECT1")
+            actionManager.disconnect(websocket, messageQueue)
 
 
 async def game_loop():
@@ -40,26 +45,37 @@ async def game_loop():
         await asyncio.sleep(1)
 
 
-async def producer_handler(websocket, path):
+async def producer_handler():
     global gameLoopAlive
     while True:
         await game_loop()
         while len(messageQueue) != 0:
             package = messageQueue.popleft()
-            print(websocket, package.message)
+            print(package.socket, package.message)
             try:
                 await package.socket.send(package.message)
             except Exception as e:
-                print("disconnect")
+                print("Error", e)
+
+
+async def close_handler(websocket):
+    await websocket.wait_closed()
+    print(websocket, 'DISCONNECTED')
+    actionManager.disconnect(websocket, messageQueue)
 
 
 async def handler(websocket, path):
     consumer_task = asyncio.ensure_future(
-        consumer_handler(websocket, path))
+        consumer_handler(websocket, path)
+    )
     producer_task = asyncio.ensure_future(
-        producer_handler(websocket, path))
+        producer_handler()
+    )
+    wait_close_task = asyncio.ensure_future(
+        close_handler(websocket)
+    )
     done, pending = await asyncio.wait(
-        [consumer_task, producer_task],
+        [consumer_task, producer_task, wait_close_task],
         return_when=asyncio.FIRST_COMPLETED,
     )
     for task in pending:
@@ -71,7 +87,7 @@ def filldb(url):
     soup = BeautifulSoup(r.text, 'html.parser')
 
 
-start_server = websockets.serve(handler, "127.0.0.1", 5678)
+start_server = websockets.serve(handler, "192.168.1.122", 5678)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(start_server)

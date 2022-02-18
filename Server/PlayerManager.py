@@ -11,7 +11,6 @@ class PlayerManager:
 
     async def login(self, websocket, nickname, password, lobbyManager, messageQueue):
         player = await self.loginByBD(nickname, password)
-        print(player)
         if player is not None:
             self.loginPlayers[websocket] = Player(player)
             req = json.dumps({'action': 'login', 'type': 'login', 'login': True})
@@ -27,11 +26,6 @@ class PlayerManager:
             return player
         except Exception as error:
             return None
-
-    def disconnect(self, socket, lobbyManeger, messageQueue):
-        nickname = self.loginPlayers[socket].nickname
-        lobbyManeger.disconnect(socket, nickname, messageQueue)
-        del self.loginPlayers[socket]
 
     def notifyByState(self, state, message, messageQueue):
         for socket in self.loginPlayers.keys():

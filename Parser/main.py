@@ -14,7 +14,6 @@ def getShikimoriParams(url):
 
 
 def getAnimeData(_names, type, id):
-
     url_anime = "https://shikimori.one/"
     req_current = Request(url=url_anime + type + '/' + str(id), headers=headers)
     html_current = urlopen(req_current).read()
